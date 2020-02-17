@@ -1,0 +1,1070 @@
+#+TITLE: A Small-Scale Example of Gerrymandering Analysis with MCMC
+#+DATE:  June 29, 2018 
+#+H: 3
+#+OPTIONS: toc:nil
+
+* Question: Did Nebraska Gerrymander Congressional District 1 in 2011?
+** Background:  
+*** For a data analysis project for OpenElections.org
+Since January, I have been formatting and cleaning precinct-level general election
+data for Nebraska.  Data is available for 2010, 2012, 2014, 2016,
+with 2006, and 2008 on the way.
+*** Prior to 2010, Congressional District 1
+In 2010, Sarpy County was split over Congressional District 1 and
+Congressional District 2.  Precincts 0035, 0036, 0037, 0040, 0080, 0052, 0051, 0079, 0068, 0069
+0070, 0071, 0084, 0085, 0086, 0072
+are in Congressional District 1.   
+
+The remaining precincts 
+0025, 0026, 0027, 0028, 0029, 0030, 0031, 0001, 0002, 0003
+0004, 0005, 0006, 0007, 0008, 0009, 0010, 0011, 0012, 0013
+0014, 0034, 0015, 0016, 0017, 0018, 0019, 0020, 0021, 0022
+0023, 0024, 0032, 0033, 0038, 0039, 0041, 0042, 0043, 0044
+0045, 0046, 0047, 0048, 0049, 0050, 0081, 0082, 0083, 0053
+0054, 0055, 0077, 0078, 0056, 0057, 0058, 0059, 0060, 0061
+0062, 0063, 0064, 0065, 0066, 0067, 0087, 0073, 0074, 0075
+and, 0076  are in Congressional District, 2.
+
+**     After redistricting in 2011
+
+Precincts 19 and 21 in Sarpy County are sub-split over Congressional
+    District 1 and Congressional District 2. 
+
+**  Suspicious?
+It seems /strange/ to me that in redistricting, it was necessary to
+split a county at the sub-precinct level to achieve requirements.
+
+In addition, since Sarpy County largely votes Republican, while
+Douglas county largely votes Democratic, this looks like it could be a
+case of redistributing Republican voters from safely Republican
+District 1 to District 2.
+
+Is there evidence of gerrymandering?
+
+
+* Goal: Provide a smaller, easier, more accessible example of MCMC Redistricting Analysis
+** Follow the MCMC example of Bangia, Hershlag, Mattingly et al. for North Carolina
+*** Also been applied in Pennsylvania gerrymandering case by Moon, et al
+** Smaller
++ Can concentrate on 2 (or possibly 3) congressional districts, not 13
++ Concentrate on many fewer precincts than NC
++ No need to consider racial balance, so redistricting scoring
+  function is easier.
++ Can concentrate on population equality, compactness
+** Easier
+No need for supercomputing
+** More accessible
++ Provide an instructional educational example of MCMC in redistricting analysis.
+** Suppose it does /not/ provide evidence of gerrymandering
++   Show that advanced methods can be used even in small cases. 
++   That would be an example that the MCMC method does not
+    automatically find gerrymandering, 
++   Another validation of the MCMC method
++   Possibly provide guidance for 2021 redistricting.
+* Structure of Paper
+** First Intention of Paper
+*** smaller, easier, more accessible example of MCMC Redistricting Analysis
++ Can concentrate on 2 (or possibly 3) congressional districts, not 13
++ Concentrate on many fewer precincts than NC
++ No need to consider racial balance, so redistricting scoring
+  function is easier.
++ Can concentrate on population equality, compactness
+*** Easier
+ No need for supercomputing
+*** More accessible
+ + Provide an instructional educational example of MCMC in
+   redistricting analysis.
+** Second Intention of Paper:  Investigate the possibility of gerrymandering CD1 and CD2
+*** Suppose it does /not/ provide evidence of gerrymandering
+ +   Show that advanced methods can be used even in small cases. 
+ +   That would be an example that the MCMC method does not
+     automatically find gerrymandering, 
+ +   Another validation of the MCMC method
+ +   Possibly provide guidance for 2021 redistricting.
+** Historical and Geographical Background
+of the 2010 distrcting of CD1 and CD2
+Talk about controversy
+Give some background on the geography and demographics of Sarpy county
+** Description of the Precincts in Sarpy County
+22 in CD1 and 30 in CD2
+Also Douglas County for CD2 and the remainder in cluding Lancaster
+County for CD1
+** Assumptions
+*** Population equality or near equality among precincts
+*** Contiguity, adjacency
+*** Compactness
+lack of legal definition, 
+size of Sarpy COunty
+*** Description of ALgorithm for the MCMC process
+* Obstacles
+** Need shape and data files for Sarpy County precincts
+** Programming, running the method
+* <2020-01-14 Tue> Lab Notebook entry
+** The best adjacency graph is sarpy_adj_neato_color.pdf
+which is pretty good, except non-planar in edges attaching to
+Precinct 61 in the lower left quadrant.
+I might be able to correct these with some hand-tuning.
+** Some quick census information about Sarpy County 
+https://www.census.gov/quickfacts/fact/table/dakotacountynebraska,hallcountynebraska,lancastercountynebraska,sarpycountynebraska,douglascountynebraska,NE/PST045219
+
+** The link trail for searching for data
+https://www.census.gov/topics/public-sector/voting.html
+then 
+
+** This may help
+https://statisticalatlas.com/county-subdivision/Nebraska/Sarpy-County/Springfield-Precinct/Population
+
+** Even better
+http://www.usboundary.com/Areas/Voting%20District/Nebraska/Sarpy%20County/Papillion%20Second%201%20Precinct/613872
+* <2020-01-15 Wed> Lab Notebook entry
+** Verified that the precincts I have for Sarpy County are correct
+https://www.sarpy.com/offices/election-commission/maps
+There are 52 precincts, just as I enumerated in sarpy_adj.gv.
+The maps there mention that they were authorized 9/9/2011
+I did not find any population information on the maps.
+** The information at www.usboundary.com does not seem to correlate
+with information on Sarpy County Election Board website.
+https://statisticalatlas.com/county-subdivision/Nebraska/Sarpy-County/Springfield-Precinct/Population
+** Census Bureau sites that seem to be relavant for getting the data
+https://www.census.gov/programs-surveys/decennial-census/about/rdo.html
+https://www2.census.gov/geo/maps/pl10map/vtd_sld/st31_ne/c31153_sarpy/PL10VTD_C31153_000.pdf
+https://www.census.gov/programs-surveys/decennial-census/about/rdo/summary-files.2010.html
+** By Legislative districts
+https://journalstar.com/news/state-and-regional/govt-and-politics/nebraska-legislative-district-rankings-show-population-cultural-trends/article_8526263f-8170-5418-8dc5-c778104b7a4a.html
+The average district population is 38,651.
+District 27 in western Lancaster County, represented by Sen. Anna
+Wishart, is the fourth largest with 41,438 residents. 
+*** Legislative Districts in Sarpy County
+|     2 |     3 |    14 |    45 |    49 |
+|-------+-------+-------+-------+-------|
+| 38130 | 36801 | 37737 | 36862 | 37250 |
+|       |       |       |       |       |
+* <2020-01-22 Wed> Lab Notebook entry
+** R package igraph is installed as of <2020-01-22 Wed>
+** Converted edges in sarpy_adj.gv into a CSV file sarpy_adj.csv 
+with a couple of emacs commands.
+** Commands to investigate the adjacency graph
+#+begin_src R
+sarpy <- read.csv("sarpy_adj.csv")
+gSarpy <- graph_from_data_frame(sarpy, directed=FALSE)
+summary(gSarpy)
+ plot(gSarpy, verstex.size=5, label.curved=TRUE, main="Sarpy County Precinct Adjacencies")
+#+end_src
+
+With the command
+components(gSarpy)
+I can see that the graph is connected, every vertex is reachable from
+any other vertexc, as I would expect for the adjacency graph for the
+precincts in a county.  I would be able to walk or drive from any
+precinct to any other.
+
+COMMENT:  <2020-01-31 Fri> NOTE THAT I DISCOVERED THAT THIS GRAPH OF
+SARPY PRECINCT ADJACENCIES IS INCORRECT BECAUSE IT IS SOMEHOW
+INTERPRETED AS A DIRECTED GRAPH (IN SPITE OF THE COMMAND.  SEE THE
+DEGREE FOR PRECINCT 1 WHICH DOES NOT COUNT THE ADJANCENCY OF PRECINCT
+13, EVEN TOUGH FROM 13 TO 1 IT DOES COUNT.
+
+The degrees of the vertices are:
+degree(gSarpy)
+ 1  3  4  5  6  7  8  9 10 11 13 16 17 18 19 20 21 23 24 25 26 31 32 33 34 35 
+ 3  6  3  4  5  5  6  5  3  5  5  4  3  3  6  5  5  7  5  5  4  4  3  5  4  4 
+36 37 38 39 40 41 42 46 48 49 51 52 53 54 55 56 57 58 59 60 61  2 12 22 62 47 
+ 6  5  3  5  5  5  4  6  5  3  3  4  3  3  6  2  3  5  4  3  8  3  3
+ 4  7  1 
+
+mean(degree(gSarpy))
+[1] 4.346154
+
+
+Betweenness: given by the number of shortest paths in the graph that
+pass through that node. This can be seen as a measure of how essential
+the node is to the graph.
+
+betweenness(gSarpy)
+          1           3           4           5           6           7 
+  9.6694805 117.9937539   3.3373016  48.6755695  43.1849404  33.1349061 
+          8           9          10          11          13          16 
+ 83.1013284 147.7927041  13.6969697 246.9092229  36.1146950  66.9975513 
+         17          18          19          20          21          23 
+ 34.2577934  33.5082066 269.3391734 192.3854978 118.7555271 196.7142056 
+         24          25          26          31          32          33 
+ 23.5259740  20.2336566  33.1802152 121.4361514  15.3258830  49.2136707 
+         34          35          36          37          38          39 
+ 37.6904717  22.1604373  80.6344402  96.1228407   0.5833333  96.2014841 
+         40          41          42          46          48          49 
+ 30.9513346 105.0368861  28.1677376 168.3225159 344.4842843   9.4437951 
+         51          52          53          54          55          56 
+  0.8333333   5.8333333   1.3333333   3.8333333 112.7236538   0.5000000 
+         57          58          59          60          61           2 
+ 45.1666667  16.2362702   6.5550723   0.0000000 119.8683370   2.7079115 
+         12          22          62          47 
+164.2877101  42.6262775 382.2108286   0.0000000
+
+From that, Precinct 62 is the most central, the most essential.
+
+
+ 
+** Investigating the populations of precincts
+
+library("tidyverse")
+ne2018 <- read.csv("~/Downloads/20181106__ne__general__precinct.csv")
+sarpy2018 <-  filter(ne2018, county=="Sarpy", office=="Governor")
+precincts <-  group_by(sarpy2018, precinct)
+precinctVoters <- summarise(precincts, sum(votes))
+
+* <2020-01-23 Thu> Lab Notebook Entry
+** An attempt at getting at the populations of each precinct
+
+Legislative Districts in Sarpy County
+
+| Leg Dist                             |      2 |         3 |      14 |        45 |        49 |           |
+|--------------------------------------+--------+-----------+---------+-----------+-----------+-----------|
+| Population                           |  38130 |     36801 |   37737 |     36862 |     37250 |     37356 |
+| Number Precincts                     |      4 |        11 |      12 |        13 |        12 |      10.4 |
+|--------------------------------------+--------+-----------+---------+-----------+-----------+-----------|
+| Population / (Number Precincts)      | 9532.5 | 3345.5455 | 3144.75 | 2835.5385 | 3104.1667 | 3591.9231 |
+|--------------------------------------+--------+-----------+---------+-----------+-----------+-----------|
+| Average Popn per All 5 Dists         |        |           |         |           |           | 4392.5001 |
+| Average Popn per Dists 3, 14, 45, 49 |        |           |         |           |           | 3107.5002 |
+#+TBLFM: @3$7=52/5::@4=@2/@3::@5$7=vsum(@4$2..@4$6)/5::@6$7=vsum(@4$3..@4$6)/4
+
+** Another Attempt to Get populations of each precinct
+
+First, using the 2018 Election results, find the number who voted in
+2018 in each precinct.
+Second, from the Nebraska Sect of State, the voter turnout in Sarpy
+County in 2018 was 60.20%.  From the census bureau, the percentage of
+the population who are registered to vote is 61.6%.  SO divide the
+number of votes by 0.602 and 0.619 to get an estimate of the
+population in each precinct.  Then take the average of that vector of
+52 precincts.
+
+#+begin_src 
+library("tidyverse")
+ne2018 <- read.csv("~/Downloads/20181106__ne__general__precinct.csv")
+sarpy2018 <-  filter(ne2018, county=="Sarpy", office=="Governor")
+precincts <-  group_by(sarpy2018, precinct)
+precinctVoters <- summarise(precincts, sum(votes))
+precinctPopn <- precinctVoters[,2]/0.602/0.619
+mean(precinctPopn$voteTtotal[3:54])
+#+end_src
+
+I get 3486.576 for the average number of voters in a Sarpy County
+precinct.  SO I could take the number of voters in a Sarpy county
+precinece to be between 3100 and 3500.
+
+** Population of Nebraska 2nd congressional district
+
+According to Wikipedia
+Population in 2015: 652,870
+
+According to Ballotpedia.org
+Population in 2010 (according to 2010 U.S. Census Bureau data)
+617,475
+
+Accoding to censusreporter.org
+Population in 2018: 673,005
+
+** Population of Nebraska 1st congressional district
+
+According to Ballotpedia.org
+Population in 2010 (according to 2010 U.S. Census Bureau data)
+616,728
+
+** Population of Douglas County in 2010
+
+https://factfinder.census.gov/faces/nav/jsf/pages/community_facts.xhtml?src=bkmk
+Douglas County Nebrasak Census Total Population
+517,110
+
+** What I need to do
+*** Consider Douglas County as an integral blob of population
+that will be inlcuded in Congressional District 2 in any case
+*** Consider Congressional District 1 less Sarpy County Districts as integral blob
+that will be included in Congressional District 1 in any case
+Find the population of that blob.
+*** Find the Sarpy precints that border Douglas county
+These will be candidates for inclusion in CongDist 2
+These precincts are 51, 52, 53, 54, 56, 57, 62, 31, 32, 34, 16, 17,
+18, 1
+*** FInd the Sarpy precincts that border COngressional District 1
+These will be candidates for inclusion in CongDist 1
+These precincts are 51, 58, 46, 48 11, 12
+*** What I need to do is to separate the adjacency graph
+* <2020-01-29 Wed> Lab Notebook entry
+** Population of Nebraska in 2010
+https://www.census.gov/quickfacts/NE
+
+1,826,341  or use the population estimates base: 1,826, 305
+
+** Theoretical size of each congressional district
+
+#+begin_src calc output:results
+1826341/3
+#+end_src
+
+#+RESULTS:
+: 608780.333333
+
+** Population of Nebraska 2nd congressional district
+
+According to Wikipedia
+Population in 2015: 652,870
+
+According to Ballotpedia.org
+Population in 2010 (according to 2010 U.S. Census Bureau data)
+617,475
+
+Accoding to censusreporter.org
+Population in 2018: 673,005
+
+** Population of Nebraska 1st congressional district
+
+According to Ballotpedia.org
+Population in 2010 (according to 2010 U.S. Census Bureau data)
+616,728
+
+** Population of Douglas County in 2010
+
+https://factfinder.census.gov/faces/nav/jsf/pages/community_facts.xhtml?src=bkmk
+Douglas County Nebraska Census Total Population
+517,110
+
+** Population of Sarpy County in 2010
+https://www.census.gov/quickfacts/fact/table/sarpycountynebraska,douglascountynebraska,NE/PST045219
+
+158,840
+
+** Average Population of each of 52 Sarpy Precincts
+
+#+begin_src calc
+158840/52
+#+end_src
+
+#+RESULTS:
+: 3054.61538462
+
+** Population of Sarpy County to Add to Douglas County to make Cong Dist 2
+
+#+begin_src calc
+617475 - 517110
+#+end_src
+
+#+RESULTS:
+: 100365
+
+** Number of Sarpy Precincts to Add to Douglas County to make Cong Dist 2
+
+#+begin_src calc
+100365/3054
+#+end_src
+
+#+RESULTS:
+: 32.8634577603
+Almost 33 precincts
+In fact, 29 and 2 portions were added in 2011 redistricting, so call
+it 30
+
+** Another way to look at the number of Sarpy precincts to add 
+to Douglas County to make Cong Dist 2
+
+Let A = population of Congressional District 1 less Sarpy County 
+      = Congresional District 1 population less 22 precincts
+      = 616728 - 22 * 3055 = 549518
+
+ #+begin_src calc
+616728 - 22 * 3055
+ #+end_src
+
+ #+RESULTS:
+ : 549518
+
+Let B = population of Congressional District 2 less Sarpy County
+      = population of Douglas County = 517110
+
+Let n = number of Sarpy precincts to add to base of Cong Dist 1 to
+make the full Cong District 1.
+Let m = number of Sarpy precincts to add to Douglas County to make the
+full Cong District 2.
+Let P = average population of each precinct = 3055.
+
+Then in principle should have A + n P = B + m P and m + n = 52.
+That is, 
+
+n + m = 52
+P(n-m) = B -A
+
+n+m = 52
+n-m = (B-A)/P
+
+so 
+n = 26 + (B-A)/(2*P)
+m = 26 - (B-A)/(2*P)
+
+#+begin_src calc
+26 + (517110 - 548518)/(2*3055)
+26 - (517110 - 548518)/(2*3055)
+#+end_src
+
+#+RESULTS:
+: 31.1404255319
+
+So this calculation says add 31 precincts to Douglas County to make
+Congressional District 2 (instead of the actually 29 plus 2 portions.)
+
+
+** The data structure for my proposed redistricting
+* <2020-01-30 Thu> Lab Notebook entry
+** The percentage deviation between populations of CD 1 and 2
+#+begin_src calc
+(617475 - 616728)
+#+end_src
+
+#+RESULTS:
+: 747
+
+#+begin_src calc :results output
+100 * ((617475 - 616728)/616728);
+#+end_src
+
+#+RESULTS:
+: 0.121123088298
+So the deviation is smaller than a precinct population.
+
+** The districting process
+Keep populations equal by keeping the same allocation of precincts,
+namely 22 precincts added to Cong Dist 1, and 30 precincts added to
+Douglas County to make Cong Dist 2.
+
+Keep the Congressional District contiguous by checking the adjacency
+graphs. 
+
+I will at the beginning ignore any measures of compactness, so the
+Cong Dists that I use may end up sprawling with a larger Polsby-Popper
+score.  
+
+** The algorithm for the dsitricting process as a Markov chain
+
+My state is the shorter list of precincts that make up Congressional
+District 1.
+
+I can make a state change by selecting a precinct $A$ currently in
+Congressional District  1 uniformly at random.
+
+If the precinct $A$ is entirely internal to Congressional District 1, then
+I can't swap it out to create a new configuration.
+
+If the precinct $A$ is
+adjacent to a precinct $B$ in Congressional District 2, (that means there
+is an edge between $A$ and $B$) then I can swap
+colors, that is $A$ now belongs to CD2 and $B$ belongs to CD 1. Does
+this break contiguity?  That would mean a path from a white precinct
+to the $A$ which is newly white.  That would mean that there cannot be
+a single edge from white.
+
+This seems to be problematic for gray district 24, even if I make
+disputed precinct 21 white, since if I choose to swap precincts 23
+(making it gray) and 24 white, then there would be no path from 23
+back to white.  
+
+Rather than making lots of casework, it might be easier to use some
+kind of R command to check the connectedness of the white subgraph and
+the gray subgraph.
+
+Maybe I want some kind of colored graph??
+
+*** Algorithm using igraph
+
+Maybe I start with the  entire (adjacency) graph of Sarpy county (plus
+the two special vertices which are the outsides of CD 1 nad CD 2,
+i.e. Dougls County).
+
+Then I have a list of 22 precincts (vertices) that go into CD 1 and
+the complementary list of 30 precincts (vertices) go into CD 2.  I
+make two subgraphs out of each of these lists, using the 
+induced_subgraph function.  
+
+Then I choose uniformly at random from the CD 1 list and I choose at
+random from  the CD 2 list and I swap them.  Then I check whether
+these new induced_subgraphs are connecte with the 
+count_components or is_connected (logical)
+function.
+
+If yes, then I need to test its election outcomes.
+
+If no, then go back and try again.
+
+Is there a more efficient way to go about this:  There is no point in
+choosing one of precincts 
+18, 20, 26, 1, 3, 5, 8, 12, 4, 13, 6, 9, 7, 10, 2
+because if I turn it white, it will not be connected to a wite
+precinct.
+
+Initially I can do the following:  
+That means I can only choose a swap candidate $A from 
+16, 17, 19, 24, 11, 22, 25
+WHat about swap candidates $B$ from CD 2, the white ones?
+I can choose from 51, 58, 46, 48, 23, 41, 37, 35, 34, 
+
+This now changes the boundaries for CD1 and CD2 so the list of
+potential swap sites is changed, so I can't keep using these lists.  
+
+I could run through these lists, finding precicnts that have neighbots
+in the other district, they are potential candidates for swapping.
+
+*** R commands to create the graph
+
+precincts <- c( "cd1", "p1", "p2", "p3", "p4", "p5", "p6", "p7",
+"p8","p9", "p10", "p11", "p12", "p13", "p16", "p17", "p18", "p19",
+"p20","p21", "p22", "p23", "p24", "p25", "p26", "p31", "p32", "p33",
+"p34","p35", "p36", "p37", "p38", "p39", "p40", "p41", "p42", "p46",
+"p47","p48", "p49", "p51", "p52", "p53", "p54", "p55", "p56", "p57",
+"p58","p59", "p60", "p61", "p62", "cd2")
+
+sarpy <- read.csv("sarpy_precincts_edges.csv")
+
+*** Possibly use some of the cluster algorithms to create, graph the Districts?
+* <2020-01-31 Fri> Lab Notebook Entry
+** Checking my inputes for igraph
+The list of precincts seems to be correct.  Has the right length and I
+checked the entries.
+
+Reading in the edge file with tidyverse read_csv() seems to give
+better results.  Will work with it now.
+
+
+After a lot of experimentation, here is the way to get the adjaency
+graph for Sarpy County Precincts:
+library("igraph")
+dat <- read.table(file="sarpy_adj.txt", header=TRUE)
+gSarpy <- graph.edgelist(as.matrix(dat), directed=FALSE)
+
+Verify that things look correct.
+
+degree(gSarpy)
+vcount(gSarpy)
+plot(gSarpy)
+components(gSarpy)
+degree_distribution(gSarpy)
+mean(degree(gSarpy))
+knn(gSarpy)
+
+** Maybe I want to use the BioConductor package graph instead
+
+https://stackoverflow.com/questions/47073836/r-how-to-install-package-graph
+
+http://www.bioconductor.org/packages/release/bioc/html/graph.html
+http://www.bioconductor.org/packages/release/bioc/manuals/graph/man/graph.pdf
+
+
+** Maybe also consdier networkx in Python
+
+See 
+https://networkx.github.io/documentation/stable/reference/algorithms/generated/networkx.algorithms.boundary.node_boundary.html?highlight=boundary#networkx.algorithms.boundary.node_boundary
+* <2020-02-03 Mon> Lab Notebook Entry
+** Using BioConductor Graph and Friends
+
+library("graph")
+library("Rgraphviz")
+
+sarpy_adj <- read.table("sarpy_adj.txt")
+sarpy_adj <- as.matrix(sarpy_adj)
+gSarpy <- ftM2graphNEL(sarpy_adj, edgemode="undirected")
+plot(gSarpy)
+plot(gSarpy, "neato")
+
+More options for rendering the plot, Seee Rgraphviz documentation Sec
+5
+
+cd1prec <- c("cd1", "p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8",
+"p9", "p10", "p11", "p12", "p13", "p16", "p17",  "p18", "p20", "p21",
+"p22",  "p24", "p25", "p26")
+cd2prec <- setdiff(nodes(gSarpy), cd1prec)
+congdist1 <- subGraph(cd1prec, gSarpy)
+congdist2 <- subGraph(cd2prec, gSarpy)
+
+bdycd1 <- unique(unlist(boundary(congdist1, gSarpy)))
+bdycd2 <- unique(unlist(boundary(congdist2, gSarpy)))
+
+sample(bdycd1, 1)
+
+** Need to get RGBL library next
+
+Look for VertexEccentricity  -- longest shortest path from source to
+every other vertex in the graph
+
+GraphPeriphery gives vertices that are maximally distant to at least
+one vertex in the graph g.
+
+GraphDiameter gives the greatest distance between any pair of vertices
+in the graph g.
+
+Length of the minimal spanning treee
+* <2020-02-04 Tue> Lab Notebook entry
+** Installed RGBL library
+
+Got the RBGL library
+No VertexEccentricity but
+I can substitute with max(dijkstra.sp(congdist1, start="cd1")) = 7
+and
+max(dijkstra.sp(congdist2, start="cd2")$distances) = 4
+
+No GraphDiameter but I can substitute with
+max(johnson.all.pairs.sp(congdist1) = 7
+and 
+max(johnson.all.pairs.sp(congdist2)) = 6
+
+
+I can test for connected component (should be 1 for contiguity) with 
+length( connectedComp(gSarpy))
+
+sample( bdycd1, 1)
+[1] "p46"
+R> sample( bdycd2, 1)
+[1] "p11"
+
+c( cd1prec[1:11], cd1prec[13:23])
+c( cd1prec[1:11], cd1prec[13:23], "p46")
+
+cd1prec[-12]  # seems to be easier to write, but relies on R special convention!
+
+congdist1new <- subGraph( c( cd1prec[-12], "p46"), gSarpy)
+
+* <2020-02-05 Wed> Lab Notebook entry
+
+** Things dome today
+In edge list test file, changed "cd1" to "lanc" and "cd2" to "doug"
+to reduce confusion, and add clarity.
+
+Started the code file as org source block, can export/tangle later.
+
+Streamlined some of the code, in a functional programming style
+ 
+** R code for the Markov Chain
+#+begin_src R :session *R* :tangle sarpyMC.R
+    library("graph")
+    library("Rgraphviz")
+    library("RBGL")
+
+   getBoundary <- function(subgraph, graph) {
+       bdy <- unique(unlist(graph::boundary(subgraph, graph)))
+       return(bdy)
+       ## returns  boundary of subgraph in graph as  R char vector
+       ## in future, add some error checking for argument types
+   }
+
+   getSarpyPrecincts <- function(precList) {
+       sarpyBoundary <- precList[!(precList %in% c("lanc", "doug"))]
+       return(sarpyBoundary)
+       ## returns list (char vector) of precincts stricly in Sarpy Cty
+       ## in future, add some error checking for argument types
+   }
+
+  makeNewCongDist <-
+      function(sarpyPrecincts, vertexDelete, vertexAdd, county) {
+          newSarpyPrecincts <-
+              c(sarpyPrecincts[-match(vertexDelete, sarpyPrecincts)],
+                              vertexAdd, county)
+       newCongDist <- graph::subGraph(newSarpyPrecincts, gSarpy)
+       return(newCongDist)
+       ## return a
+   }
+
+   vEccentricity <- function(graph, vertex) {
+       ve <-  max(RBGL::dijkstra.sp(graph, start = vertex)$distances)
+       return(ve)
+       ## returns integer, longest shortest-path from vertex to
+       ## every other vertex in graph        
+       ## in future, add some error checking for argument types
+   }
+
+   gDiameter <- function(graph) {
+       d <- max(RBGL::johnson.all.pairs.sp(graph))
+       return(d)
+       ## returns integer, greatest distance between any pair
+       ## of vertices in  graph 
+       ## in future, add some error checking for argument types
+   }
+
+   contiguous <- function(graph) {
+       con <- length(RBGL::connectedComp(graph)) == 1
+       return(con)
+       ## returns logical (boolean), TRUE if single connected component
+       ## in future, add some error checking for argument types
+   }
+
+  ## The following are compactness measures for the originally
+  ## constituted congressional districts
+  ## My goal is to have trial districts to have no
+  ## greater eccentricities or diameters.
+   BASEVECCENCD1 <- 7
+   BASEGDIAMCD1 <- 7
+
+   BASEVECCENCD2 <- 4
+   BASEGDIAMCD2 <- 6
+
+   sarpyAdj <- as.matrix(read.table("sarpy_adj.txt")) 
+   #n x 2 edgelist matrix, not adjacency matrix!
+
+   gSarpy <- ftM2graphNEL(sarpyAdj, edgemode = "undirected")
+
+   cd1Prec <- c("lanc", "p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8",
+  "p9", "p10", "p11", "p12", "p13", "p16", "p17",  "p18", "p20", "p21",
+  "p22",  "p24", "p25", "p26")
+   cd2Prec <- setdiff(nodes(gSarpy), cd1Prec)
+   congDist1 <- subGraph(cd1Prec, gSarpy)
+   congDist2 <- subGraph(cd2Prec, gSarpy)
+
+stepcounter <- 1
+#+end_src
+
+#+RESULTS:
+: 1
+
+#+begin_src R :session *R* :tangle sarpyMC.R
+bdyCongDist1 <-
+      getSarpyPrecincts(getBoundary(congDist1, gSarpy)) # in CongDist2
+  bdyCongDist2 <-
+      getSarpyPrecincts(getBoundary(congDist2, gSarpy)) # in CongDist1
+
+   #randomly select a boundary precinct for each Congressional District
+   precFromCongDist1 <- sample(bdyCongDist2, 1)
+   precFromCongDist2 <- sample(bdyCongDist1, 1)
+
+  ## something not working about here.....  Looks like the selected
+  ## precinct doesn't get deleted.
+  newCongDist1 <- makeNewCongDist(getSarpyPrecincts(cd1Prec),
+                                  precFromCongDist1, precFromCongDist2,
+                                  "lanc")
+   newCongDist2 <- makeNewCongDist(getSarpyPrecincts(cd2Prec),
+                                   precFromCongDist2, precFromCongDist1,
+                                   "doug")
+
+cat( vEccentricity(newCongDist1, "lanc"), gDiameter(newCongDist1), contiguous(newCongDist1), "\n")
+cat( vEccentricity(newCongDist2, "doug"), gDiameter(newCongDist2), contiguous(newCongDist2), "\n")
+
+   if (vEccentricity(newCongDist1, "lanc") <= BASEVECCENCD1 &&
+       gDiameter(newCongDist1) <= BASEGDIAMCD1 &&
+       contiguous(newCongDist1) &&
+       vEccentricity(newCongDist2, "doug") <= BASEVECCENCD2 &&
+       gDiameter(newCongDist2) <= BASEGDIAMCD2 &&
+       contiguous(newCongDist2)
+      ) {
+       cat("Successful step", stepcounter, "\n")
+       congDist1 <- newCongDist1
+       congDist2 <- newCongDist2
+       } else {
+       cat("precinct exchange not successful")
+       }
+
+cat("step counter", stepcounter, "\n")
+stepcounter <- stepcounter + 1
+#+end_src
+
+#+RESULTS:
+: 11
+
+* <2020-02-06 Thu> Lab Notebook entry
+
+** Continued to work on R script from <2020-02-05 Wed>
+Much refactoring
+All names wint to camelCase
+* <2020-02-07 Fri> Lab Notebook entry
+
+** I think I have the Markov step working after some more refactroing.
+* <2020-02-09 Sun> Lab Notebook entry
+
+** Need to get election results for 
+- 2010  -- Actually, this I don't need, since this would be before the
+  present redistricting
+- 2012
+- 2014
+- 2016
+- 2018
+
+Need Votes results for Sarpy County, by precinct, for Representative by
+Party
+Need this in tidy format
+Each observation is of the form:
+
+Year, Precinct, Party (R or D), Votes 
+
+which means there are 4 variables: Year, Precinct, Party, Votes
+
+** F0r the current districting:
+For each election year:
+- I need the total votes for each candidate in District 2
+This gives a baseline or benchmark Republican lean for Congression
+District 2
+- I need the total votes in Sarpy County Congresional District 2 precincts for each
+  candidate
+- Subtracting gives the Douglas County District 2 votes for each candidate
+I will need this for each redistricting to add to the the new
+districting of Sarpy County precincts into CD2
+** Now when I have a new districting
+
+I want the Sarpy County District 2 precincts vote total for each candidate under
+that new distrciting. 
+Add to that the Douglas County District 2 votes for that year to see who is
+the winner.
+Find the percentage vote to determine where on the percentage spectrum
+this lies.  Is that year a an outlier in the array of vote tallies?
+
+Does any potential shift in voters due to the new districting also
+affect Congreesional DIstrict 1?  
+Have to do the same thing for District 1
+
+*** R question:  Is there an efficient "tidy" way to sum over a list
+Want something like a group_by 
+Maybe use some kind of subsetting by good use of %in%
+
+** How to connect this to the Markov Chain process?
+Given how the MCMC process evolves, can I actually make this separate,
+since you want to sample at each step of the stationary distribution
+
+Maybe make this a subroutine:  All I really need is the precinct list
+(nodes) of the new plausible districting.  Giving that, It is only a
+matter of processing the fairly short election data file.
+
+** The MCMC method
+
+I now have a way to make a step from one plausible districting to
+another.
+But it takes several attempts at exchanging precincts between the two
+districts to get a plausible districting.
+
+Do I want to keeptrack of the attempts and the reasons fro the
+failures?
+
+What kind of a loop do I want to use keep this going:
+Until loop, then finish a districting ?
+Keep track of the number of attempts to find a new district
+Kepp track of the reason for failure:
+
+If this seems to be too restrictive, maybe eliminate the criteria of
+the subgraph diameter, ???
+
+* <2020-02-10 Mon> Lab Notebook Entry
+
+read.csv("~/Downloads/20181106__ne__general__precinct.csv",
+as.is="precinct") %>% filter(county=="Sarpy", office=="House",
+votes!=0) %>% select("precinct", "district", "candidate", "votes") %>
+% mutate( prec= str_replace( precinct, "Precinct ", "p"))
+x
+This essentially gets me the Sarpy data by precinct that I need.
+* <2020-02-13 Thu> Lab Notebook entry
+** Added section above with tentative outline of article
+** Finalized data collection for 202, 2014, 2016, 2018
+Obtained data files from openelections.org
+
+  -rw-r--r--. 1 sdunbar sdunbar 1231785 Feb 13 10:12 20121106__ne__general__precinct.csv
+  -rw-r--r--. 1 sdunbar sdunbar 2166196 Feb 13 10:09 20141104__ne__general__precinct.csv
+  -rw-r--r--. 1 sdunbar sdunbar  956329 Feb 13 10:09 20161108__ne__general__precinct.csv
+  -rw-r--r--. 1 sdunbar sdunbar 1562652 Jan 22 15:26 20181106__ne__general__precinct.csv
+
+May have to do file-by-file, that is, election-by-election cleaning to
+get the cleaned data files, since each election has some different
+fromatting.  For example, 2012, 2014 list office as "Representative",
+2016 has "United States Representative" and 2018 has "House"
+
+Also, there are third party candidates (like LIB) running in  2012,
+2014, 2016.  But they shouldn't make any difference to my analysis.
+
+The following chain cleans the 2018 data
+read.csv("20181106__ne__general__precinct.csv", as.is="precinct") %>%
+filter(county=="Sarpy", office=="House", votes!=0) %>% 
+mutate( prec=str_replace( precinct, "Precinct ", "p")) %>%
+mutate(filledparty=ifelse(candidate=="Jeff Fortenberry", "REP","DEM"))
+%>% select("prec", "district", "filledparty", "votes") %>%
+head() 
+
+
+* <2020-02-14 Fri> Lab Notebook entry
+** Scrubbing and simplying date for 2018
+
+The logic on this truned out to be harder than expected
+
+read.csv("20181106__ne__general__precinct.csv", as.is="precinct") %>%
+filter(county=="Sarpy", office=="House", votes!=0) %>%
+mutate(prec=str_replace( precinct, "Precinct ", "p")) %>%
+mutate(filledparty=ifelse( ( str_detect(candidate, "Jeff
+Fortenberry") | str_detect(candidate, "Don Bacon")), "REP","DEM")) %>%
+select("prec", "district", "filledparty", "candidate", "votes") %>%
+rename(party = filledparty) %>% View()
+
+
+*** Validation of scrubbing and simplying:
+Nebraska Secretary of State 2018 General Canvas Results
+https://sos.nebraska.gov/sites/sos.nebraska.gov/files/doc/elections/2018/2018-general-election-official-results.pdf
+page 9 says for Sarpy County
+| Cong Dist | REP    |   DEM |
+|-----------+--------+-------|
+|         1 | 13,715 |  9802 |
+|         2 | 27,793 | 16342 |
+
+
+The results I get are:
+
+ read.csv("20181106__ne__general__precinct.csv", as.is="precinct") %>%
+ filter(county=="Sarpy", office=="House", votes!=0) %>%
+ mutate(prec=str_replace( precinct, "Precinct ", "p")) %>%
+ mutate(filledparty=ifelse( ( str_detect(candidate, "Jeff
+ Fortenberry") | str_detect(candidate, "Don Bacon")), "REP","DEM"))
+ %>% select("prec", "district", "filledparty", "votes") %>%
+ rename(party = filledparty) %>% group_by(party, district) %>%
+ summarise(sarpytotals=sum(votes))
+# A tibble: 4 x 3
+# Groups:   party [2]
+  party district sarpytotals
+  <chr>    <int>       <dbl>
+1 DEM          1        9802
+2 DEM          2       16342
+3 REP          1       13715
+4 REP          2       27793
+
+
+
+** Scrubbing and simplifying the data for 2016
+
+read.csv("20161108__ne__general__precinct.csv", as.is="precinct") %>%
+filter(county=="Sarpy", office=="United States Representative",
+votes!=0) %>% filter(precinct != "") %>% mutate( prec=str_replace(
+precinct, "Precinct ", "p")) %>% select("prec", "district", "party",
+"votes") %>% head()
+
+
+*** Validation of scrubbing and simplifying
+Nebraska Secretary of State 2016 General Canvas Results
+https://sos.nebraska.gov/sites/sos.nebraska.gov/files/doc/elections/2016/2016-canvass-book.pdf
+
+| Cong Dist |   REP |   DEM |  LIB |
+|-----------+-------+-------+------|
+|         1 | 18745 |  9544 |      |
+|         2 | 30675 | 18372 | 1696 |
+|           |       |       |      |
+
+
+read.csv("20161108__ne__general__precinct.csv", as.is="precinct") %>% filter(county=="Sarpy", office=="United States Representative",votes!=0) %>% filter(precinct != "") %>% mutate( prec=str_replace(precinct, "Precinct ", "p")) %>% select("prec", "district", "party","votes") %>% group_by(party, district) %>% summarise(sarpytotals = sum(votes))
+# A tibble: 7 x 3
+# Groups:   party [4]
+  party district sarpytotals
+  <fct> <fct>          <int>
+1 ""    1                 94
+2 ""    2                 34
+3 "DEM" 1               9544
+4 "DEM" 2              18372
+5 "LIB" 2               1696
+6 "REP" 1              18745
+7 "REP" 2              30675
+
+** Scrubbing and simplifying the data for 2014
+
+ read.csv("20141104__ne__general__precinct.csv", as.is="precinct") %>%
+filter(county=="Sarpy", office=="Representative", votes!=0) %>%
+filter(precinct != "") %>% mutate( prec=str_replace( precinct,
+"Precinct ", "p")) %>% select("prec", "district", "party", "votes")
+%>% View()
+
+*** Validation of scrubbing and simplifying
+Nebraska Secreary of State General Canvas Results
+https://sos.nebraska.gov/sites/sos.nebraska.gov/files/doc/elections/2014/2014-General-Canvass-Recount-Final.pdf
+
+| Cong Dist |   REP |   DEM |  LIB |
+|-----------+-------+-------+------|
+|         1 | 11220 |  5358 |      |
+|         2 | 15113 | 10934 | 1754 |
+|           |       |       |      |
+
+ read.csv("20141104__ne__general__precinct.csv", as.is="precinct") %>%
+ filter(county=="Sarpy", office=="Representative", votes!=0) %>%
+ filter(precinct != "") %>% mutate( prec=str_replace(
+ precinct,"Precinct ", "p")) %>% select("prec", "district", "party",
+ "votes") %>% group_by(party, district) %>% summarise(sarpytotals =
+ sum(votes))
+# A tibble: 5 x 3
+# Groups:   party [3]
+  party district sarpytotals
+  <fct>    <int>       <int>
+1 DEM          1        5621
+2 DEM          2       10671
+3 LIB          2        1754
+4 REP          1       11220
+5 REP          2       15113
+
+
+This the only election for which there is a slight discrepancy in the
+vote totals for the DEM.
+
+** Scrubbing and simplifying the data for 2012
+read.csv("20121106__ne__general__precinct.csv", as.is="precinct") %>%
+filter(county=="Sarpy", office=="Representative", votes!=0) %>%
+filter(precinct != "") %>% mutate( prec=str_replace( precinct,
+"Precinct ", "p")) %>% select("prec", "district", "party", "votes")
+%>% View()
+
+
+*** Validation of scrubbing and simplifying
+Nebraska Secreary of State General Canvas Results
+
+
+| Cong Dist |   REP |   DEM | LIB |
+|-----------+-------+-------+-----|
+|         1 | 16849 |  9191 |     |
+|         2 | 26600 | 16748 |     |
+|           |       |       |     |
+
+ read.csv("20121106__ne__general__precinct.csv", as.is="precinct") %>% filter(county=="Sarpy", office=="Representative", votes!=0) %>% filter(precinct != "") %>% mutate( prec=str_replace( precinct, "Precinct ", "p")) %>% select("prec", "district", "party", "votes") %>% group_by(party, district) %>% summarise(sarpytotals = sum(votes))
+# A tibble: 4 x 3
+# Groups:   party [2]
+  party district sarpytotals
+  <fct>    <int>       <int>
+1 DEM          1        9191
+2 DEM          2       16748
+3 REP          1       16849
+4 REP          2       26600
+* <2020-02-15 Sat> Lab Notebook entry
+** Sketch of the Markov Chain Monte Carlo
+Declare constants of the present partition
+Create the Sarpy county plus Lanc and Doug NodeEdgeList graph
+Create the list of CD1 and CD2 precincts
+Create CD1 and CD2 as subgraphs of gSarpy
+-> Maybe preserve this as constants of a sort, just as with gSarpy
+
+Step findBdys:
+find the boundary of CD1 inside CD2
+find the boundary of CD2 inside CD1
+
+initialize the Markov chain trial counter
+
+Step randSelect:
+select a random precinct from the boundary of CD1
+select a random precinct from the boundary of CD2
+
+-> maybe delete these from a list so that repeated selections don't
+   select it again when the current/previous doens't work
+
+swap the selected districts and make a newCD1 and newCD2
+
+Check the new congressional districts for contiutiy and compactness
+   by checking against the constants.
+based on experiments, this probably won't work
+
+increment the Markov chain trial counter
+
+If it doesn't work So go back to Step randSelect: and do again
+If it does work, go back to Step findBdys:
+  record the current partition so I can check if it has been seen
+  before
+* <2020-02-17 Mon> Lab Notebook Entry
+** I have a version of the Sarpy Markov Chain working
+At least it seems to be able to make one step from the original
+partition into Congressional District 1 to Congressional District 2.
+
+So I am going to put that under git version control and then try to
+get it make longer term arbitrary chains of step and keep some records
+about the steps.
+
+
+
+
+ 
