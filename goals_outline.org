@@ -882,7 +882,7 @@ head()
 * <2020-02-14 Fri> Lab Notebook entry
 ** Scrubbing and simplying date for 2018
 
-The logic on this truned out to be harder than expected
+The logic on this turned out to be harder than expected
 
 read.csv("20181106__ne__general__precinct.csv", as.is="precinct") %>%
 filter(county=="Sarpy", office=="House", votes!=0) %>%
@@ -1068,3 +1068,161 @@ about the steps.
 
 
  
+* <2020-02-18 Tue> Lab Notebook entry
+Did some debugging, located places where something isn't working, but
+not able to tell why.
+
+* <2020-02-19 Wed> Lab Notebook entry
+
+Spent some time debugging the MCMC sript, sarpyMC.R
+Now it takes 10 steps with no apparent problems at this time.
+
+Where do I go from here?
+
+I should do some benchmarking to see where the slow parts of my code
+are.
+
+One thing that would be nice would be to have some kind of
+visualization of the congressional districts
+1.  Make the Douglas and Lancaster nodes different, bigger,
+   distinguishable
+2.  Make the Douglas and Lancaster nodes fixed in place, Douglas to
+   the north and Lancaster to the south.
+3.  Color the precincts to distinguish them, the default should be
+   gray for Congressional District 2 and white for Congressional
+   District 2.
+
+I would like to do some validation of the districts, perhaps with the
+visualization.  Validation would include:
+1.  Visual inspection for compactness.
+2.  Comparison of changes from the base congressional districts of
+   2010
+3.  Would like to have some kind of accounting of having seen a
+   districting before.  Maybe some count of how many different
+   districtings I have seen.
+One way to do this would be to have a hash, or a signature of the
+nodes vector.  Need to be careful about ordering, so that a
+permutation of the same precincts would not be different.  I could
+always sort first, of course.  That maight make sense.
+Looks like I need the openssl package.....
+stackoverflow.com/questions/21686645/
+
+For each vote (2012, 2014, 2016, 2018)
+1. For Congressional District 1, I need the votes for Republicans outside of Sarpy County,
+   (this would be the total votes for Republicans in that election in
+   Congressional District 1
+   minus the votes in Sarpy COunty for the Republicans.  I would call
+   this the votes in Lancaster county.)
+2. For Congressional District 1, I need the votes for Democrats outside of Sarpy County,
+   (this would be the total votes for Democrats in that election  in
+   Congressional District 1
+   minus the votes in Sarpy County for the Democrats)
+3. I need the votes for Republicans outside of Sarpy County,
+   (this would be the total votes for Republicans in that election  in
+   Congressional District 2
+   minus the votes in Sarpy COunty for the Republicans.  This would be
+   the votes for Republicans in Douglas County.)
+4. I need the votes for Democrats outside of Sarpy County,
+   (this would be the total votes for Democrats in that election
+   minus the votes in Sarpy County for the Democrats.  This would be
+   the votes for Democrats in Douglas County.)
+
+Given the nodes (precincts) in a Congressional District, I need to sum
+the votes over those precincts.  This allows me to determine the
+outcomes of an election over those precincts.
+1.  I have the tidy data.frame with the votes by precinct.
+Somehow, I want to label the nodes from my new Congressional District
+as CD1 or CD2, then I could use group_by and then sum.
+Is this easier or clearer than just summing over the precincts
+directly.
+2.  Maybe I use the %in% function, or some kind of mapping, of the
+   vector over the tibble/data.frame to generate a TRUE/FALSE, then
+   sum over the TRUES.  This would be the same as 1 above, but would
+   use TRUE/FALSE insted of CD1/CD2.
+
+The following example from stackoverflow.com/questions/1169248/ 
+pop <- c(1, 2, 4, 6, 10)
+Tset <- c(2,10, 7)
+pop[which(!(pop %in% Tset))]
+seems to be appropriate
+can streamline this with
+pop[!pop%in%Tset]
+
+The little reprex works as advertised.
+This will take some testing and validation.
+
+* <2020-02-21 Fri> Lab notebook entry
+
+** Data into dataframes for use by Markov Chain
+Using the data scrubbing results from <2020-02-14 Fri>
+
+Elec2018 <-  read.csv("20181106__ne__general__precinct.csv", as.is="precinct") %>% filter(county=="Sarpy", office=="House", votes!=0) %>% mutate(prec=str_replace( precinct, "Precinct ", "p")) %>% mutate(filledparty=ifelse( ( str_detect(candidate, "Jeff Fortenberry") | str_detect(candidate, "Don Bacon")), "REP","DEM")) %>% select("prec", "district", "filledparty", "candidate", "votes") %>% rename(party = filledparty)
+
+Added in the Douglas county "precinct" totals with 
+Elec2018 <- rbind(Elec2018, setNames(c("doug", 2, "REP", "Don Bacon", 98922), names(Elec2018)))
+
+and
+
+Elec2018 <- rbind(Elec2018, setNames(c("doug", 2, "DEM", "Kara Eastman", 105428), names(Elec2018)))
+
+where the votes totals are from 
+https://sos.nebraska.gov/sites/sos.nebraska.gov/files/doc/elections/2018/2018-general-election-official-results.pdf
+page 9
+
+
+Added in the Lancaster "precinct" (i.e. all of Cong Dist 1 votes
+outside of Sarpy County) totals with 
+
+ Elec2018 <- rbind(Elec2018, setNames(c("lanc", 1, "REP", "Jeff Fortenberry", 127997), names(Elec2018)))
+ Elec2018 <- rbind(Elec2018, setNames(c("lanc", 1, "DEM", "Jessica McClure", 83267), names(Elec2018)))
+
+
+For safekeeping, wrote the data with
+write.csv(Elec2018, "Elec2018.csv")
+
+** Hash of dictionary for each Markov step
+
+Very good advice 
+https://stackoverflow.com/questions/2858014/working-with-dictionaries-lists-in-r
+
+I can collapse the Cong Dist 1 precinct list into a long indentifier
+like this:
+h <-  str_c(sort(nodes(congDist1)), collapse="")
+Note that this an orthographic sort, so p10 is after p1, and p9 at the end.
+
+This is an indentifier of 61 chars, kinda long.
+I should thin about a better way to create an indeitifier for the
+District.
+
+Got this working with 
+            h <-  str_c(sort(nodes(congDist1)), collapse="")
+            if (h %in% names(districtsSeen)) {
+                districtsSeen[[h]] <- districtsSeen[[h]] + 1
+            } else {
+                districtsSeen[[h]] <- 1
+            }
+        }
+
+after a successful Markov step!
+
+** Adding up the votes in a district
+
+Elec2018[[vo
+
+
+Got it working, but clumsy and slow.
+FOund this: maybe it will help!
+https://docs.ropensci.org/Rclean/
+
+
+** Next steps:
+
+0. Put under version control, so that I can start a branch
+1.  Do some profiling, find the hot spots
+2.  Use RClean for suggestions for refactoring
+3.  Use lintr to standardise and find formatting errors.
+4.  Use Rtidy to clean up and standardise.
+
+Then start to work on implementing Markov CHain Monte Carlo for the
+walk on the meta-graph.
+
