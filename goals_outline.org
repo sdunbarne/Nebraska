@@ -1226,3 +1226,10 @@ https://docs.ropensci.org/Rclean/
 Then start to work on implementing Markov CHain Monte Carlo for the
 walk on the meta-graph.
 
+* <2020-02-24 Mon> Lab Notebook entry
+** Applied formatR::tidy_source to clean things up
+** Applied profvis to profile the code.  The majority of time is spent in
+getBoundary, about 63% (= 1310/2080 ms)
+** Checked again, it seems to be running correctly still
+after these improvements and clean-ups. etc.
+** Put it back under git control
