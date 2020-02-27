@@ -1,7 +1,7 @@
 library("graph")
 library("Rgraphviz")
 library("RBGL")
-library("tidyverse")
+library("dplyr")
 
 getBoundary <- function(subgraph, graph) {
     bdy <- unique(unlist(graph::boundary(subgraph, graph)))
@@ -71,67 +71,74 @@ Elec2018 <- read.csv("Elec2018.csv")
 
 mcData <- data.frame(mcStep = 0, rePartionTrial = 0,
                      EccenCD1 = 7, DiamCD1 = 7, CompCD1 = 1, 
-                     EccenCD2 = 4, DiamCD2 = 6, CompCD2 = 1)
-districtsSeen <- c(1)
-names(districtsSeen) <- c(str_c(sort(nodes(congDist1)), collapse = ""))
+                     EccenCD2 = 4, DiamCD2 = 6, CompCD2 = 1,
+                     bdyCD1 = 9, BdyCD2 = 9)
+## districtsSeen <- c(1)
+## names(districtsSeen) <- c(str_c(sort(nodes(congDist1)), collapse = ""))
 
 elecOutcomes <- data.frame(mcStep = 0, cd2DEM = 121770, cd2REP = 126715)
+
 for (mcStep in 1:10) {
+rePartitionTrial <- 1
     
-    
-    rePartitionTrial <- 1
-    
-    repeat {
+bdyCongDist1 <-
+    getSarpyPrecincts(getBoundary(congDist1, gSarpy))  # in CongDist2
+bdyCongDist2 <-
+    getSarpyPrecincts(getBoundary(congDist2, gSarpy))  # in CongDist1
+
+repeat {
         # rePartition Trial
         
-        bdyCongDist1 <-
-            getSarpyPrecincts(getBoundary(congDist1, gSarpy))  # in CongDist2
-        bdyCongDist2 <-
-            getSarpyPrecincts(getBoundary(congDist2, gSarpy))  # in CongDist1
         # randomly select a boundary precinct for each Congressional District
-        precFromCongDist1 <- sample(bdyCongDist2, 1)
-        precFromCongDist2 <- sample(bdyCongDist1, 1)
+    precFromCongDist1 <- sample(bdyCongDist2, 1)
+    precFromCongDist2 <- sample(bdyCongDist1, 1)
         
         
-        newCongDist1 <-
-            makeNewCongDist(getSarpyPrecincts(nodes(congDist1)),
-                            precFromCongDist1, precFromCongDist2,
-                            "lanc")
-        newCongDist2 <-
-            makeNewCongDist(getSarpyPrecincts(nodes(congDist2)),
-                            precFromCongDist2, precFromCongDist1,
-                            "doug")
+    newCongDist1 <-
+        makeNewCongDist(getSarpyPrecincts(nodes(congDist1)),
+                        precFromCongDist1, precFromCongDist2,
+                        "lanc")
+    newCongDist2 <-
+        makeNewCongDist(getSarpyPrecincts(nodes(congDist2)),
+                        precFromCongDist2, precFromCongDist1,
+                        "doug")
         
-        testvEccenCD1 <- vEccentricity(newCongDist1, "lanc")
-        testgDiamCD1 <- gDiameter(newCongDist1)
-        testCompsCD1 <- length(RBGL::connectedComp(newCongDist1))
-        testvEccenCD2 <- vEccentricity(newCongDist2, "doug")
-        testgDiamCD2 <- gDiameter(newCongDist2)
-        testCompsCD2 <- length(RBGL::connectedComp(newCongDist1))
+    testvEccenCD1 <- vEccentricity(newCongDist1, "lanc")
+    testgDiamCD1 <- gDiameter(newCongDist1)
+    testCompsCD1 <- length(RBGL::connectedComp(newCongDist1))
+    testvEccenCD2 <- vEccentricity(newCongDist2, "doug")
+    testgDiamCD2 <- gDiameter(newCongDist2)
+    testCompsCD2 <- length(RBGL::connectedComp(newCongDist1))
         
-        trialData <- c(mcStep, rePartitionTrial,
-                       testvEccenCD1, testgDiamCD1, testCompsCD1, 
-                       testvEccenCD2, testgDiamCD2, testCompsCD2)
-        mcData <- rbind(mcData, setNames(trialData, names(mcData)))
-        
-        allConditions <- testvEccenCD1 <= BASEVECCENCD1 &&
-            testgDiamCD1 <= BASEGDIAMCD1 && 
-            contiguous(newCongDist1) &&
-            testvEccenCD2 <= BASEVECCENCD2 &&
-            testgDiamCD2 <= BASEGDIAMCD2 && contiguous(newCongDist2)
-        
+    trialData <- c(mcStep, rePartitionTrial,
+                   testvEccenCD1, testgDiamCD1, testCompsCD1, 
+                   testvEccenCD2, testgDiamCD2, testCompsCD2,
+                   length(bdyCongDist1), length(bdyCongDist2))
+    mcData <- rbind(mcData, setNames(trialData, names(mcData)))
+    
+    allConditions <- testvEccenCD1 <= BASEVECCENCD1 &&
+        testgDiamCD1 <= BASEGDIAMCD1 && 
+        contiguous(newCongDist1) &&
+        testvEccenCD2 <= BASEVECCENCD2 &&
+        testgDiamCD2 <= BASEGDIAMCD2 && contiguous(newCongDist2)
+
+    rePartitionTrial <- rePartitionTrial + 1
+
+    if (allConditions) 
+        break
+}        
 # From here on down, is now as of Fri, Feb 21.This need serious checking and
 # vetting.  also needs improvement, and simplification , now it is clumsy!
         if (allConditions) {
             congDist1 <- newCongDist1
             congDist2 <- newCongDist2
             
-            h <- str_c(sort(nodes(congDist1)), collapse = "")
-            if (h %in% names(districtsSeen)) {
-                districtsSeen[[h]] <- districtsSeen[[h]] + 1
-            } else {
-                districtsSeen[[h]] <- 1
-            }
+            ## h <- str_c(sort(nodes(congDist1)), collapse = "")
+            ## if (h %in% names(districtsSeen)) {
+            ##     districtsSeen[[h]] <- districtsSeen[[h]] + 1
+            ## } else {
+            ##     districtsSeen[[h]] <- 1
+            ## }
             
             outcome <- filter(Elec2018, prec %in% nodes(congDist2)) %>%
                 group_by(party) %>% 
@@ -144,10 +151,4 @@ for (mcStep in 1:10) {
                                names(elecOutcomes)))
         }
         
-        rePartitionTrial <- rePartitionTrial + 1
-        
-        if (allConditions) 
-            break
-        
-    }
 }

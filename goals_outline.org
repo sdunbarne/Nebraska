@@ -1233,3 +1233,57 @@ getBoundary, about 63% (= 1310/2080 ms)
 ** Checked again, it seems to be running correctly still
 after these improvements and clean-ups. etc.
 ** Put it back under git control
+** I should add CongDist1 results to the elecOutcomes
+now that I know things are working pretty well, and
+* <2020-02-27 Thu> Lab Notebook entry
+** Non-reversibility of the Markov Chain
+
+Consider the following:  As originally constituted, The boundary of
+Congressional District 2 in Sarpy County is 
+ "p16" "p17" "p20" "p21" "p11" "p24" "p1"  "p18"
+(in Congressional District 1).
+The boundary of
+Congressional District 1 in Sarpy County is 
+"p23" "p48" "p19" "p34" "p35" "p46" "p51" "p58"
+(in Congressional District 2).
+
+Now suppose I create a valid new districting by moving p11 into
+Congressional District 2 and moving p23 into Congressional District 1.
+This creates a new pair of Congressional DIstricts.  The probability
+of choosing this exchange is (1/8)*(1/8) = 1/64
+
+Now the boundary of Congressional District 1 in Sarpy County is
+ "p11"  "p19"  "p34"  "p35"  "p41"  "p42"  "p48"  "p49"  "p46" 
+ "p51"  "p58" 
+with 10 precincts in Congressional District 2, one if which is p11.
+
+The boundary of Congressional District 2 in Sarpy County is 
+"p16"  "p17"  "p20"  "p21"  "p23"  "p24"  "p26"  "p12"  "p1"
+"p18" 
+with 10 proecincts, one of which is p23.
+
+But now the probability of choosing these two to go back to the
+original configuration is (1/10) * (1/10) = 1/100
+
+So the Markov chain is /not reversible/.
+
+
+** Made some improvements in running time.
+
+Moved the boundary calculations out of the inner "repeat" loop for
+trials to create a new Distrciting.
+
+Also moved data  summaries after redistrcting out ouf the repeat loop
+and removed the if condistions since it is now automatically
+satisfied.
+
+Finally, I commented out the lines where I count the districts seen in
+distrcitsSeen.  Doens't seem to help at this time and I can get by
+without loading the stringr library.
+
+Reduced the tidyverse library loading to just dplyr.
+
+This reduces the running time to about 1990 ms from about 3480
+ms.Also, most of the routines are balanced, don't seem to be any
+hotspots.
+
