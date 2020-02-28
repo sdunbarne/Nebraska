@@ -1287,3 +1287,117 @@ This reduces the running time to about 1990 ms from about 3480
 ms.Also, most of the routines are balanced, don't seem to be any
 hotspots.
 
+* <2020-02-28 Fri> Lab Notebook entry
+** Investigation of BUGS, JAGS, STAN
+Can I use BUGS, JAGS or STAN, although this has the effect of diluting
+my goal of setting up a simple and comprehenisible example of the
+redistricting by instead using black-box stle software.
+Among these, I think I can eliminate BUGS since it seems to be most
+adapted for Windows, and requires some simulator like WINE to run.
+But from examples and commentary, I think these are more for Bayesian
+statsitical analysis, not the more fundamental distribution sampling I
+want to do.
+I don't think these tools accomplish what I am looking for.
+
+After looking at a simple Andrew Gelman example, I am now pretty sure
+this is the case.
+
+
+** I need or want a final distribution \pi on districts
+That is, I want to have a goal for the stanle distrbution.
+I think this should help me define the Metropolis algorithm or the
+Metropolis-Hastings algorithm or maybe the ibbs sampler algorithm
+
+One choice would be to use uniform distribution on all feasible
+appropriate districts.
+
+Another choice would be weight the distrcits chosen by VEccentricity
+and diameter, with the base Eccentricity as a standard.  This might be
+an interesting way to approach the problem.  This is interesting
+because it would favor even better districts that what currently exist
+or are used.
+
+Another idea might be to use some simulated annealing process and
+increase the temperature to approach uniform distribution.
+
+* Defining a scoring function for the districts
+
+Let $(E, F)$ be a subgraph partition of $G$ which satisifies certain
+contraints:
+1.  $E$ (COngressional District 1) contains $24$ nodes reporesenting the $23$ precincts in Sarpy
+   County plus the remainder of Congressional District 1 which I
+   designate as "lanc".
+2.  $F$ (COngressional District 2) contains $31$ nodes reporesenting the $30$ precincts in Sarpy
+   County plus the remainder of Congressional District 2 which is
+   exactly Douglas County, designated as "doug".
+3. As graphs, $E$ has one component (the District in contiguous) and
+   $F$ is likewise contiguous.  Together as graphs, $E$ and $F$ are
+   disjoint, $E \union F = G$.
+
+I want to reward districts that 
+1.  have a no-bigger vertex eccentricity
+from the base nodes ("lanc" and "doug" respectively for districts 1
+and 2) and 
+2.  have a no-bigger graph diameter
+from the base nodes ("lanc" and "doug" respectively for districts 1
+and 2).
+
+Want some kind of function that when at a minimum or lower value
+rewards that district
+Consider J1 = (VEccen(E) -V_0(E)) + (VEccen(F) - V_0(F)) where VEccen(\cdot) is
+the Vertex Eccentricity from the base district ("lanc" for CD1, "doug"
+for CD2) and V_0(E) and V_0(F) are the current values form the 2011
+districting.  Specifically V_0(E) = 7 and V_0(F) = 4
+
+Consider J2 = (GDiam(E) -G_0(E)) + (GDiam(F) - G_0(F)) where GDiam(\cdot) is
+the Graph Diameter from the base district ("lanc" for CD1, "doug"
+for CD2).   G_0(E) and G_0(F) are the current values from the 2011
+districting.  Specifically G_0(E) = 7 and G_0(F) = 6
+
+The scoring function will be 
+\[
+     J((E,F)) =  J_1 + w J_2
+\]
+where $w$ is some relative factor for the two graph functions.
+
+Fix $\beta > 0$, define
+\[
+     \mathbb{P}_{\beta}[ (E,F) ] = \frac{\EulerE^{-\beta
+J((E,F))}}{\sum\limits_{(E,F) \in \mathcal{R}} \EulerE^{-\beta
+J((E,F))}}
+\]
+
+The positive constant $\beta$ is the ``inverse temperature'' in
+analogy with statistical mechanics and gas dynamics. 
+
+When $\beta$ is very small (think high temperature, much
+mixing), different elements of $\mathcal{R}$ have close to equal
+probability (think $\beta = 0$, equiprobability). As $\beta$ increases
+(temperature decreases causing solidification), the measure
+concentrates the probability around the redistrictings $(E,F) \in
+\mathcal{R}$ which minimize $J((E,F))$.  That is, favoring districts
+with small eccentricity and small diameter
+
+Note that according to the theory, I don't need the total partition
+function:
+\[
+\sum\limits_{(E,F) \in \mathcal{R}} \EulerE^{-\betaJ((E,F))}
+\]
+That's the beauty of the MCMC method.
+
+Use Markov Chain Monte Carlo (MCMC)  to sample with
+a random walk on $\mathcal{R}$ with $\mu = \mathbb{P}_{\beta}$ as its unique,
+attracting stationary measure.
+
+Hastings-Metropolis Algorithm:
+$Q(\xi, \xi' )$ gives the probability of moving from the redistricting
+$\xi$ to the redistricting $\xi'$:
+1. Choose some initial state $\xi \in \mathcal{R}$.
+2. Propose a new state $\xi'$ with transition probabilities given by $Q(\xi, \xi' )$.
+3. Accept the proposed state with probability $p = \min\left (1, \frac{\mu(\xi')Q(\xi' ,\xi)}{ \mu(\xi)Q(\xi,\xi' )}\right)$.
+4. Repeat steps 2 and 3.
+
+The stationary distribution of this Markov chain matches the stationary measure $\mu$.
+
+Use $Q$ to  sample  according to $\mu$.
+
