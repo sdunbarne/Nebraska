@@ -1320,84 +1320,138 @@ or are used.
 Another idea might be to use some simulated annealing process and
 increase the temperature to approach uniform distribution.
 
-* Defining a scoring function for the districts
+** Defining a scoring function for the districts
 
-Let $(E, F)$ be a subgraph partition of $G$ which satisifies certain
-contraints:
-1.  $E$ (COngressional District 1) contains $24$ nodes reporesenting the $23$ precincts in Sarpy
-   County plus the remainder of Congressional District 1 which I
-   designate as "lanc".
-2.  $F$ (COngressional District 2) contains $31$ nodes reporesenting the $30$ precincts in Sarpy
-   County plus the remainder of Congressional District 2 which is
-   exactly Douglas County, designated as "doug".
-3. As graphs, $E$ has one component (the District in contiguous) and
-   $F$ is likewise contiguous.  Together as graphs, $E$ and $F$ are
-   disjoint, $E \union F = G$.
+ Let $(E, F)$ be a subgraph partition of $G$ which satisifies certain
+ contraints:
+ 1.  $E$ (COngressional District 1) contains $24$ nodes reporesenting the $23$ precincts in Sarpy
+    County plus the remainder of Congressional District 1 which I
+    designate as "lanc".
+ 2.  $F$ (COngressional District 2) contains $31$ nodes reporesenting the $30$ precincts in Sarpy
+    County plus the remainder of Congressional District 2 which is
+    exactly Douglas County, designated as "doug".
+ 3. As graphs, $E$ has one component (the District in contiguous) and
+    $F$ is likewise contiguous.  Together as graphs, $E$ and $F$ are
+    disjoint, $E \union F = G$.
 
-I want to reward districts that 
-1.  have a no-bigger vertex eccentricity
-from the base nodes ("lanc" and "doug" respectively for districts 1
-and 2) and 
-2.  have a no-bigger graph diameter
-from the base nodes ("lanc" and "doug" respectively for districts 1
-and 2).
+ I want to reward districts that 
+ 1.  have a no-bigger vertex eccentricity
+ from the base nodes ("lanc" and "doug" respectively for districts 1
+ and 2) and 
+ 2.  have a no-bigger graph diameter
+ from the base nodes ("lanc" and "doug" respectively for districts 1
+ and 2).
 
-Want some kind of function that when at a minimum or lower value
-rewards that district
-Consider J1 = (VEccen(E) -V_0(E)) + (VEccen(F) - V_0(F)) where VEccen(\cdot) is
-the Vertex Eccentricity from the base district ("lanc" for CD1, "doug"
-for CD2) and V_0(E) and V_0(F) are the current values form the 2011
-districting.  Specifically V_0(E) = 7 and V_0(F) = 4
+ Want some kind of function that when at a minimum or lower value
+ rewards that district
+ Consider J1 = (VEccen(E) -V_0(E)) + (VEccen(F) - V_0(F)) where VEccen(\cdot) is
+ the Vertex Eccentricity from the base district ("lanc" for CD1, "doug"
+ for CD2) and V_0(E) and V_0(F) are the current values form the 2011
+ districting.  Specifically V_0(E) = 7 and V_0(F) = 4
 
-Consider J2 = (GDiam(E) -G_0(E)) + (GDiam(F) - G_0(F)) where GDiam(\cdot) is
-the Graph Diameter from the base district ("lanc" for CD1, "doug"
-for CD2).   G_0(E) and G_0(F) are the current values from the 2011
-districting.  Specifically G_0(E) = 7 and G_0(F) = 6
+ Consider J2 = (GDiam(E) -G_0(E)) + (GDiam(F) - G_0(F)) where GDiam(\cdot) is
+ the Graph Diameter from the base district ("lanc" for CD1, "doug"
+ for CD2).   G_0(E) and G_0(F) are the current values from the 2011
+ districting.  Specifically G_0(E) = 7 and G_0(F) = 6
 
-The scoring function will be 
-\[
-     J((E,F)) =  J_1 + w J_2
-\]
-where $w$ is some relative factor for the two graph functions.
+ The scoring function will be 
+ \[
+      J((E,F)) =  J_1 + w J_2
+ \]
+ where $w$ is some relative factor for the two graph functions.
 
-Fix $\beta > 0$, define
-\[
-     \mathbb{P}_{\beta}[ (E,F) ] = \frac{\EulerE^{-\beta
-J((E,F))}}{\sum\limits_{(E,F) \in \mathcal{R}} \EulerE^{-\beta
-J((E,F))}}
-\]
+ Fix $\beta > 0$, define
+ \[
+      \mathbb{P}_{\beta}[ (E,F) ] = \frac{\EulerE^{-\beta
+ J((E,F))}}{\sum\limits_{(E,F) \in \mathcal{R}} \EulerE^{-\beta
+ J((E,F))}}
+ \]
 
-The positive constant $\beta$ is the ``inverse temperature'' in
-analogy with statistical mechanics and gas dynamics. 
+ The positive constant $\beta$ is the ``inverse temperature'' in
+ analogy with statistical mechanics and gas dynamics. 
 
-When $\beta$ is very small (think high temperature, much
-mixing), different elements of $\mathcal{R}$ have close to equal
-probability (think $\beta = 0$, equiprobability). As $\beta$ increases
-(temperature decreases causing solidification), the measure
-concentrates the probability around the redistrictings $(E,F) \in
-\mathcal{R}$ which minimize $J((E,F))$.  That is, favoring districts
-with small eccentricity and small diameter
+ When $\beta$ is very small (think high temperature, much
+ mixing), different elements of $\mathcal{R}$ have close to equal
+ probability (think $\beta = 0$, equiprobability). As $\beta$ increases
+ (temperature decreases causing solidification), the measure
+ concentrates the probability around the redistrictings $(E,F) \in
+ \mathcal{R}$ which minimize $J((E,F))$.  That is, favoring districts
+ with small eccentricity and small diameter
 
-Note that according to the theory, I don't need the total partition
-function:
-\[
-\sum\limits_{(E,F) \in \mathcal{R}} \EulerE^{-\betaJ((E,F))}
-\]
-That's the beauty of the MCMC method.
+ Note that according to the theory, I don't need the total partition
+ function:
+ \[
+ \sum\limits_{(E,F) \in \mathcal{R}} \EulerE^{-\betaJ((E,F))}
+ \]
+ That's the beauty of the MCMC method.
 
-Use Markov Chain Monte Carlo (MCMC)  to sample with
-a random walk on $\mathcal{R}$ with $\mu = \mathbb{P}_{\beta}$ as its unique,
-attracting stationary measure.
+ Use Markov Chain Monte Carlo (MCMC)  to sample with
+ a random walk on $\mathcal{R}$ with $\mu = \mathbb{P}_{\beta}$ as its unique,
+ attracting stationary measure.
 
-Hastings-Metropolis Algorithm:
-$Q(\xi, \xi' )$ gives the probability of moving from the redistricting
-$\xi$ to the redistricting $\xi'$:
-1. Choose some initial state $\xi \in \mathcal{R}$.
-2. Propose a new state $\xi'$ with transition probabilities given by $Q(\xi, \xi' )$.
-3. Accept the proposed state with probability $p = \min\left (1, \frac{\mu(\xi')Q(\xi' ,\xi)}{ \mu(\xi)Q(\xi,\xi' )}\right)$.
-4. Repeat steps 2 and 3.
+ Hastings-Metropolis Algorithm:
+ $Q(\xi, \xi' )$ gives the probability of moving from the redistricting
+ $\xi$ to the redistricting $\xi'$:
+ 1. Choose some initial state $\xi \in \mathcal{R}$.
+ 2. Propose a new state $\xi'$ with transition probabilities given by $Q(\xi, \xi' )$.
+ 3. Accept the proposed state with probability $p = \min\left (1, \frac{\mu(\xi')Q(\xi' ,\xi)}{ \mu(\xi)Q(\xi,\xi' )}\right)$.
+ 4. Repeat steps 2 and 3.
 
-The stationary distribution of this Markov chain matches the stationary measure $\mu$.
+ The stationary distribution of this Markov chain matches the stationary measure $\mu$.
 
-Use $Q$ to  sample  according to $\mu$.
+ Use $Q$ to  sample  according to $\mu$.
 
+** Things to do and to check as I converge to a working version
+1.  CHeck my precincts as nodes for Sarpy county, should be 52, make
+   sure I have correct list.
+2.  Check my list of adajcencies in sarpy_adj.txt
+3. Check that I have all the adjacencies for Congressional District 1
+   to Sarpy precincts, not just the Lancaster County adjacencies.
+4.  Check that I have the correct adjacencies to Douglas County
+5.  Check my Elec2018 data again and make sure it correlates to all
+   the above.
+6. Check that I am recording DEM and REP totals correctly
+7.  Check to see that I have Hastongs-Metropolis implemented correctly
+8.  Think about other places I could have error conditions arising....
+9.  Doing some timings:
+| MC steps | Time | Bottleneck   |     Percent |
+|----------+------+--------------+-------------|
+|       10 |  1.4 | %in%         |          30 |
+|       20 | 2.48 | %in%, lapply | each     30 |
+|       40 | 4.42 | %in%, lapply |          25 |
+|       80 | 8.62 | %in%, lapply | each     25 |
+
+Approximately, given the number N of steps, it will take time N/10
+secs
+
+So 1000 steps, approx 100 sec approx 2 mins
+10000 steps approx 1000 sec approx 17 min
+60000 steps approx 6000 sec approx 1.7 hr
+
+* <2020-03-03 Tue> Lab Notebook entry
+
+** Program work
+The simulated annealing is working.  I have five steps from inverse
+temperature 0 to inverse temperature 1.0
+
+If the Markov cahin has N steps, the program takes about N/10 seconds
+to run.
+
+The hotspot in the program appears to be the getBoundary function.
+
+** More Data 2016
+
+ read.csv("20161108__ne__general__precinct.csv", as.is="precinct") %>%
+ filter(county=="Sarpy", office=="United States
+ Representative",votes!=0) %>% filter(precinct != "") %>%
+ filter(candidate != "WRITE_IN") %>% filter(party != "LIB") %>%
+ mutate( prec=str_replace(precinct, "Precinct ", "p"))  %>%
+ mutate(filledparty=ifelse( ( str_detect(candidate, "Jeff
+ Fortenberry") | str_detect(candidate, "Don Bacon")), "REP","DEM"))
+ %>% select("prec", "district", "filledparty", "candidate", "votes")
+ %>% rename(party = filledparty) %>% select("prec", "district",
+ "party","votes") %>% group_by(party, district)
+
+This works, but need to get and add in doug and lanc totals.
+
+Also need to cross-validate this.

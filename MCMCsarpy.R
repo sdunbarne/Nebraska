@@ -53,28 +53,28 @@ contiguous <- function(graph) {
 ## Positive is bad (low probability of choosing),
 ## negative is good (higher prob of choosing)
 
-eccenDifaf <- function(graph1, graph2) {
+eccenDiff <- function(graph1, graph2) {
     BASEVECCENCD1 <- 7
     BASEVECCENCD2 <- 4
     totalVEccen <-
               (vEccentricity(graph1, "lanc") - BASEVECCENCD1) +
               (vEccentricity(graph2, "doug") - BASEVECCENCD2)
-    return totalVEccen
+    return(totalVEccen)
 }
 
 diamDiff <- function(graph1, graph2) {
     BASEGDIAMCD1 <- 7
     BASEGDIAMCD2 <- 6
-    totalGDiam <- (gDiameter(graph1) - BASEDIAMCD1) + 
-        (gDiameter(graph2) - BASEDIAMCD2)
-    retrun totalGDiam
+    totalGDiam <- (gDiameter(graph1) - BASEGDIAMCD1) + 
+        (gDiameter(graph2) - BASEGDIAMCD2)
+    return(totalGDiam)
 }
 
-energy <- function(beta, w, graph1, graph2) {
+energy <- function(b, w, graph1, graph2) {
     e <-
-        exp( -beta * (eccenDiff(graph1, graph2) +
-                      w * eccenDiff(graph1, graph2)))
-    retrun e
+        exp( -b * (eccenDiff(graph1, graph2) +
+                      w * diamDiff(graph1, graph2)))
+    return(e)
 }
 
 Q <- function(E,F) {
@@ -84,15 +84,16 @@ Q <- function(E,F) {
         getSarpyPrecincts(getBoundary(E, gSarpy))  # in CongDist2
     bdyCongDist2 <-
         getSarpyPrecincts(getBoundary(F, gSarpy))  # in CongDist1
-    q <- 1/( bdyCongDist1 * bdyCongDist2)
+    q <- 1/( length(bdyCongDist1) * length(bdyCongDist2) )
+    return(q)
 }
     
-acceptance <- function( Eprime, Fprime, E, F) {
+acceptance <- function(b, Eprime, Fprime, E, F) {
     ratio <- 
-        (energy(beta, W, Eprime, Fprime) * Q(Eprime, Fprime))/
-        (energy(beta, w, E, F) * Q(E, F))
+        (energy(b, 1, Eprime, Fprime) * Q(Eprime, Fprime))/
+        (energy(b, 1, E, F) * Q(E, F))
     accep <- min(c(1, ratio))
-    return accep
+    return(accep)
 }
 
 
@@ -114,53 +115,68 @@ congDist2 <- subGraph(cd2Prec, gSarpy)
 
 Elec2018 <- read.csv("Elec2018.csv")
 
-elecOutcomes <- data.frame(mcStep = 0, cd2DEM = 121770, cd2REP = 126715)
+elecOutcomes <- data.frame(mcStep = 0, cd2DEM = 121770, cd2REP = 126715, winner = "R")
 
-for (mcStep in 1:10) {
-## rePartitionTrial <- 1
-    
-bdyCongDist1 <-
-    getSarpyPrecincts(getBoundary(congDist1, gSarpy))  # in CongDist2
-bdyCongDist2 <-
-    getSarpyPrecincts(getBoundary(congDist2, gSarpy))  # in CongDist1
+for (b in seq(0, 1, 0.25) ) { 
+ for (mcStep in 1:50) {
 
-    repeat { # rePartition Trial
 
-    # randomly select a boundary precinct for each Cong District
-    precFromCongDist1 <- sample(bdyCongDist2, 1)
-    precFromCongDist2 <- sample(bdyCongDist1, 1)
-        
-        
-    newCongDist1 <-
-        makeNewCongDist(getSarpyPrecincts(nodes(congDist1)),
-                        precFromCongDist1, precFromCongDist2,
-                        "lanc")
-    newCongDist2 <-
-        makeNewCongDist(getSarpyPrecincts(nodes(congDist2)),
-                        precFromCongDist2, precFromCongDist1,
-                        "doug")
-        
-        testgDiamCD1 <= BASEGDIAMCD1 && 
-         &&
-        testvEccenCD2 <= BASEVECCENCD2 &&
-        testgDiamCD2 <= BASEGDIAMCD2 && contiguous(newCongDist2)
+     rePartitionTrial <- 1
 
-    ## rePartitionTrial <- rePartitionTrial + 1 
+     bdyCongDist1 <-
+         getSarpyPrecincts(getBoundary(congDist1, gSarpy))  # in CongDist2
+     bdyCongDist2 <-
+         getSarpyPrecincts(getBoundary(congDist2, gSarpy))  # in CongDist1
 
-    if (contiguous(newCongDist1) && contiguous(newCongDist2)) 
-        break
-}        
+     repeat { # rePartition Trial
 
-    congDist1 <- newCongDist1
-    congDist2 <- newCongDist2
-            
-    outcome <- filter(Elec2018, prec %in% nodes(congDist2)) %>%
-        group_by(party) %>% 
-        summarise(newelec = sum(as.integer(votes)))
-            
-    elecOutcomes <-
-        rbind(elecOutcomes,
-              setNames(c(mcStep, as.integer(outcome[1, 2]),
-                         as.integer(outcome[2, 2])),
-                       names(elecOutcomes)))
+                                         # randomly select a boundary precinct for each Cong District
+         precFromCongDist1 <- sample(bdyCongDist2, 1)
+         precFromCongDist2 <- sample(bdyCongDist1, 1)
+
+
+         newCongDist1 <-
+             makeNewCongDist(getSarpyPrecincts(nodes(congDist1)),
+                             precFromCongDist1, precFromCongDist2,
+                             "lanc")
+         newCongDist2 <-
+             makeNewCongDist(getSarpyPrecincts(nodes(congDist2)),
+                             precFromCongDist2, precFromCongDist1,
+                             "doug")
+
+         rePartitionTrial <- rePartitionTrial + 1 
+
+         if (contiguous(newCongDist1) && contiguous(newCongDist2)) {
+             u <- runif(1)               #1 sample from default [0,1]
+             p <- acceptance(b, newCongDist1, newCongDist2, congDist1, congDist2)
+             if (u <= p) {
+                 congDist1 <- newCongDist1
+                 congDist2 <- newCongDist2
+
+                 break
+             }
+         }
+
+         if (rePartitionTrial == 150) {
+             cat("rePartition Trials reached 150 without new partition\n")
+         }
+
+     }    
+
+     if (b == 1.0) {
+         outcome <- filter(Elec2018, prec %in% nodes(congDist2)) %>%
+             group_by(party) %>% 
+             summarise(newelec = sum(as.integer(votes)))
+
+         winner <- if ( as.integer(outcome[2, 2]) > as.integer(outcome[1, 2]) ) {
+                       "R" } else {
+                               "D"
+                           }
+         elecOutcomes <-
+             rbind(elecOutcomes,
+                   setNames(c(mcStep, as.integer(outcome[1, 2]),
+                              as.integer(outcome[2, 2]), winner),
+                            names(elecOutcomes)))
+     }
+ }
 }
