@@ -1455,3 +1455,240 @@ The hotspot in the program appears to be the getBoundary function.
 This works, but need to get and add in doug and lanc totals.
 
 Also need to cross-validate this.
+* <2020-03-04 Wed> Lab Notebook entry
+** Scrubbing and recording the 2016 data
+#+begin_src R :session *R*
+  library("tidyverse")
+    read.csv("20161108__ne__general__precinct.csv", as.is="precinct") %>%
+	filter(county=="Sarpy", office=="United States Representative",votes!=0) %>%
+	filter(precinct != "") %>%
+	filter(candidate != "WRITE-IN") %>%
+	filter(party != "LIB") %>%
+	mutate( prec=str_replace(precinct, "Precinct ", "p"))  %>%
+	mutate(filledparty=ifelse( ( str_detect(candidate,
+				  "Jeff Fortenberry") | str_detect(candidate, "Don Bacon")),
+				  "REP","DEM")) %>%
+	select("prec", "district", "filledparty", "candidate", "votes") %>%
+	rename(party = filledparty) %>% select("prec", "district",
+					       "party","votes") %>%
+	group_by(party, district) %>%
+	summarise(totals = sum(votes))
+#+end_src
+
+#+RESULTS:
+| DEM | 1 |  9544 |
+| DEM | 2 | 18372 |
+| REP | 1 | 18745 |
+| REP | 2 | 30675 |
+
+This agrees with the Secretary of State totals for Sarpy County, so I
+am satisfied the I have the correct filtering of the 2016 data.
+
+where the votes totals are from 
+https://sos.nebraska.gov/sites/sos.nebraska.gov/files/doc/elections/2018/2018-general-election-official-results.pdf
+page 9
+
+I also need to add in the results for the "doug" and "lanc" precincts
+
+#+begin_src R :session *R*
+library("tidyverse")
+Elec2016 <- read.csv("20161108__ne__general__precinct.csv", as.is="precinct") %>%
+	filter(county=="Sarpy", office=="United States Representative",votes!=0) %>%
+	filter(precinct != "") %>%
+	filter(candidate != "WRITE-IN") %>%
+	filter(party != "LIB") %>%
+	mutate( prec=str_replace(precinct, "Precinct ", "p"))  %>%
+	mutate(filledparty=ifelse( ( str_detect(candidate,
+				  "Jeff Fortenberry") | str_detect(candidate, "Don Bacon")),
+				  "REP","DEM")) %>%
+	select("prec", "district", "filledparty", "candidate", "votes") %>%
+	rename(party = filledparty) %>% select("prec", "district",
+					       "party","votes") %>%
+	group_by(party, district)
+
+Elec2016 <- rbind(Elec2016, list(prec="doug", district=as.character(2), party="DEM",  votes=119230))
+Elec2016 <- rbind(Elec2016, list(prec="doug", district=as.character(2), party="REP",  votes=110391))
+
+Elec2016 <- rbind(Elec2016, list(prec="lanc", district=as.character(1), party="DEM",  votes=73923))
+Elec2016 <- rbind(Elec2016, list(prec="lanc", district=as.character(1), party="REP",  votes=171026))
+#+end_src
+
+
+
+
+** Running the Markov chain Monte Carlo simulation for 2016
+
+The source file is MCMC2016.R, the data file is Elec2016.csv
+
+All simulations come out as wins for the REP by small margins.
+
+* <2020-03-05 Thu> Lab notebook entry
+#+begin_src R :session *R*
+library("tidyverse")
+Elec2014 <- read.csv("20141104__ne__general__precinct.csv", as.is="precinct") %>%
+	filter(county=="Sarpy", office=="Representative",votes!=0) %>%
+	filter(precinct != "") %>%
+	filter(party != "LIB") %>%
+        mutate( prec=str_replace(precinct, "Precinct ", "p"))  %>%
+	mutate(filledparty=ifelse( ( str_detect(candidate,
+				  "Jeff Fortenberry") | str_detect(candidate, "Lee Terry")),
+				  "REP","DEM")) %>%
+	select("prec", "district", "filledparty", "candidate", "votes") %>%
+	rename(party = filledparty) %>% 
+        select("prec", "district", "party", "votes") %>%
+	group_by(party, district)
+
+Elec2014 <- rbind(Elec2014, list(prec="doug", district=2, party="DEM",  votes=72938))
+Elec2014 <- rbind(Elec2014, list(prec="doug", district=2, party="REP",  votes=63044))
+
+Elec2014 <- rbind(Elec2014, list(prec="lanc", district=1, party="DEM",  votes=50480))
+Elec2014 <- rbind(Elec2014, list(prec="lanc", district=1, party="REP",  votes=108106))
+#+end_src
+
+#+RESULTS:
+| p19  | 2 | DEM |    213 |
+| p21  | 1 | DEM |    263 |
+| p23  | 2 | DEM |    337 |
+| p31  | 2 | DEM |    589 |
+| p32  | 2 | DEM |    318 |
+| p33  | 2 | DEM |    359 |
+| p34  | 2 | DEM |    377 |
+| p35  | 2 | DEM |    409 |
+| p36  | 2 | DEM |    347 |
+| p37  | 2 | DEM |    432 |
+| p38  | 2 | DEM |    369 |
+| p39  | 2 | DEM |    397 |
+| p40  | 2 | DEM |    384 |
+| p41  | 2 | DEM |    443 |
+| p42  | 2 | DEM |    351 |
+| p46  | 2 | DEM |    240 |
+| p47  | 2 | DEM |    203 |
+| p48  | 2 | DEM |    404 |
+| p49  | 2 | DEM |    427 |
+| p51  | 2 | DEM |    363 |
+| p52  | 2 | DEM |    448 |
+| p53  | 2 | DEM |    397 |
+| p54  | 2 | DEM |    431 |
+| p55  | 2 | DEM |    411 |
+| p56  | 2 | DEM |    299 |
+| p57  | 2 | DEM |    317 |
+| p58  | 2 | DEM |    185 |
+| p59  | 2 | DEM |    266 |
+| p60  | 2 | DEM |    251 |
+| p61  | 2 | DEM |    458 |
+| p62  | 2 | DEM |    246 |
+| p19  | 2 | REP |    388 |
+| p21  | 2 | REP |    484 |
+| p23  | 2 | REP |    630 |
+| p31  | 2 | REP |    748 |
+| p32  | 2 | REP |    343 |
+| p33  | 2 | REP |    361 |
+| p34  | 2 | REP |    375 |
+| p35  | 2 | REP |    371 |
+| p36  | 2 | REP |    601 |
+| p37  | 2 | REP |    710 |
+| p38  | 2 | REP |    474 |
+| p39  | 2 | REP |    551 |
+| p40  | 2 | REP |    495 |
+| p41  | 2 | REP |    583 |
+| p42  | 2 | REP |    498 |
+| p46  | 2 | REP |    448 |
+| p47  | 2 | REP |    260 |
+| p48  | 2 | REP |    686 |
+| p49  | 2 | REP |    533 |
+| p51  | 2 | REP |    614 |
+| p52  | 2 | REP |    578 |
+| p53  | 2 | REP |    456 |
+| p54  | 2 | REP |    482 |
+| p55  | 2 | REP |    579 |
+| p56  | 2 | REP |    413 |
+| p57  | 2 | REP |    313 |
+| p58  | 2 | REP |    365 |
+| p59  | 2 | REP |    399 |
+| p60  | 2 | REP |    320 |
+| p61  | 2 | REP |    763 |
+| p62  | 2 | REP |    292 |
+| p1   | 1 | DEM |    234 |
+| p2   | 1 | DEM |    161 |
+| p3   | 1 | DEM |    271 |
+| p4   | 1 | DEM |    252 |
+| p5   | 1 | DEM |    215 |
+| p6   | 1 | DEM |    272 |
+| p7   | 1 | DEM |    246 |
+| p8   | 1 | DEM |    167 |
+| p9   | 1 | DEM |    204 |
+| p10  | 1 | DEM |    172 |
+| p11  | 1 | DEM |    258 |
+| p12  | 1 | DEM |    214 |
+| p13  | 1 | DEM |    323 |
+| p16  | 1 | DEM |    343 |
+| p17  | 1 | DEM |    334 |
+| p18  | 1 | DEM |    227 |
+| p19  | 1 | DEM |    199 |
+| p20  | 1 | DEM |    338 |
+| p21  | 1 | DEM |    139 |
+| p22  | 1 | DEM |    261 |
+| p24  | 1 | DEM |    135 |
+| p25  | 1 | DEM |    148 |
+| p26  | 1 | DEM |    245 |
+| p1   | 1 | REP |    284 |
+| p2   | 1 | REP |    442 |
+| p3   | 1 | REP |    463 |
+| p4   | 1 | REP |    542 |
+| p5   | 1 | REP |    458 |
+| p6   | 1 | REP |    508 |
+| p7   | 1 | REP |    496 |
+| p8   | 1 | REP |    528 |
+| p9   | 1 | REP |    391 |
+| p10  | 1 | REP |    330 |
+| p11  | 1 | REP |    675 |
+| p12  | 1 | REP |    567 |
+| p13  | 1 | REP |    800 |
+| p16  | 1 | REP |    551 |
+| p17  | 1 | REP |    526 |
+| p18  | 1 | REP |    379 |
+| p19  | 1 | REP |    426 |
+| p20  | 1 | REP |    559 |
+| p21  | 1 | REP |    403 |
+| p22  | 1 | REP |    489 |
+| p24  | 1 | REP |    438 |
+| p25  | 1 | REP |    365 |
+| p26  | 1 | REP |    600 |
+| doug | 2 | DEM |  72938 |
+| doug | 2 | REP |  63044 |
+| lanc | 1 | DEM |  50480 |
+| lanc | 1 | REP | 108106 |
+
+FOr Saarpy vote totals, I get 
+  party district totals
+  <chr>    <int>  <int>
+1 DEM          1   5621
+2 DEM          2  10671
+3 REP          1  11220
+4 REP          2  15113
+
+which agree with the Secretary of State for the Republican totals 
+but dissagree with the Secretary of State in that I get 
+5691 - 5358 = 263 more votes in District 1 Sarpy and the SoS gets 
+10934 - 10671 = 263 more votes in District 2 Sarpy
+
+However, go back to the original CSV file and look a tline 33001 in
+the file which is (surrounded her by previous line and following line)
+
+Sarpy,Precinct 20,Representative,1,DEM,Brad Ashford,0
+Sarpy,Precinct 21,Representative,1,DEM,Brad Ashford,263
+Sarpy,Precinct 22,Representative,1,DEM,Brad Ashford,0
+
+Note that here in the original data file, Precinct 19 CD1  gets 263 for
+Brad Ashford, who is running in CD2!  So this where the votes get
+misrepresented.  SO those 263 votes should get shifted to CD2, then
+my totals will agree with the SoS Official Canvass results.
+
+This is the only votes entry with the value 263, so
+I can fix this in the data transformation chain, with the ad hoc fix
+mutate(if(votes==263) district = 2) %>%
+
+Ooops this didn't work, so I will reach into the file Elec2014 and
+change this one line by hand.  Then it will be fixed to use for the
+redistricting program.
+
