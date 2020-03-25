@@ -1691,4 +1691,56 @@ mutate(if(votes==263) district = 2) %>%
 Ooops this didn't work, so I will reach into the file Elec2014 and
 change this one line by hand.  Then it will be fixed to use for the
 redistricting program.
+** <2020-03-09 Mon> Lab Notebook entry
 
+In 2018, Kara Eastman wins Douglas County by 105428 - 98922
+
+In 2018, the DEM loses every precinct, except p1 by 12 votes and p18
+by 7 votes.
+
+The mean loss of DEM by precinct is 284.5 with a standard deviation of
+199.5.
+
+So the potential loss in 32 precincts (like CD2) in Sarpy County is like
+32 *  84, 32 * 284, 32 * 485
+2688 , 9088, 15520
+
+so it is possible for a DEM to win CD with the right 32 precincts.
+
+In fact, using the lest losing 32 precincts in Sarpy in 2018, gives a
+DEM a net loss of 4869, still enough to win CD2 by 1637.  
+
+The 32 precincts in Sarpy are :
+ pre
+  p1
+ p10
+ p16
+ p17
+ p18
+ p19
+  p2
+ p20
+ p21
+ p22
+ p24
+ p25
+ p26
+  p3
+  p4
+  p5
+  p6
+  p7
+  p9
+ p32
+ p33
+ p34
+ p35
+ p38
+ p42
+ p47
+ p53
+ p54
+ p56
+ p57
+ p60
+ p62

@@ -90,8 +90,8 @@ Q <- function(E,F) {
     
 acceptance <- function(b, Eprime, Fprime, E, F) {
     ratio <- 
-        (energy(b, 1, Eprime, Fprime) * Q(Eprime, Fprime))/
-        (energy(b, 1, E, F) * Q(E, F))
+        (energy(b, 2, Eprime, Fprime) * Q(Eprime, Fprime))/
+        (energy(b, 2, E, F) * Q(E, F))
     accep <- min(c(1, ratio))
     return(accep)
 }
@@ -115,10 +115,15 @@ congDist2 <- subGraph(cd2Prec, gSarpy)
 
 Elec2018 <- read.csv("Elec2018.csv")
 
-elecOutcomes <- data.frame(mcStep = 0, cd2DEM = 121770, cd2REP = 126715, winner = "R")
+elecOutcomes <- data.frame(mcStep = 0,
+                           cd2DEM = 121770, cd2REP = 126715,
+                           winner = as.character("R"),
+                           vEccCD1 = 7, vEccCD2 = 4,
+                           gDiamCD1 = 7, gDiam = 6,
+                           rePart = 0)
 
 for (b in seq(0, 1, 0.25) ) { 
- for (mcStep in 1:50) {
+ for (mcStep in 1:100) {
 
 
      rePartitionTrial <- 1
@@ -168,14 +173,21 @@ for (b in seq(0, 1, 0.25) ) {
              group_by(party) %>% 
              summarise(newelec = sum(as.integer(votes)))
 
-         winner <- if ( as.integer(outcome[2, 2]) > as.integer(outcome[1, 2]) ) {
+         winner < if ( as.integer(outcome[2, 2]) > as.integer(outcome[1, 2]) ) {
                        "R" } else {
                                "D"
                            }
          elecOutcomes <-
              rbind(elecOutcomes,
-                   setNames(c(mcStep, as.integer(outcome[1, 2]),
-                              as.integer(outcome[2, 2]), winner),
+                   setNames(c(mcStep,
+                              as.integer(outcome[1, 2]),
+                              as.integer(outcome[2, 2]),
+                              winner,
+                              vEccentricity(congDist1, "lanc"),
+                              vEccentricity(congDist2, "doug"),
+                              gDiameter(congDist1),
+                              gDiameter(congDist2),
+                              rePartitionTrial),
                             names(elecOutcomes)))
      }
  }
